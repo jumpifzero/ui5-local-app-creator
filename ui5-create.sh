@@ -5,10 +5,12 @@
 # The website will be available under a url something.app.com (which points to localhost)
 #
 
-SCRIPT_FOLDER=`dirname "$BASH_SOURCE"`
+#SCRIPT_FOLDER=`dirname "$BASH_SOURCE"`
+SCRIPT_FOLDER=$(dirname $(readlink -f "$BASH_SOURCE"))
 PROJECTS_FOLDER=~/projectos/
 UI5_RESOURCES_FOLDER=/home/tiago/lib/ui5/sapui5-1.40.12/resources
 
+echo Running from ${SCRIPT_FOLDER}
 
 cd $PROJECTS_FOLDER
 
@@ -28,15 +30,19 @@ git clone $git_repo_url ${app_name}
 
 
 # Create a link between the www folder and the webapp inside the git created folder
+sudo mkdir /var/www/${app_name}
 cd /var/www/${app_name}
-ln -s -T ${PROJECTS_FOLDER}/${app_name}/webapp html
+sudo ln -s -T ${PROJECTS_FOLDER}/${app_name}/webapp html
 # create a /resources pointing to ui5
-ln -s -T ${UI5_RESOURCES_FOLDER} resources
+
+cd /var/www/${app_name}/html
+sudo ln -s -T ${UI5_RESOURCES_FOLDER} resources
 
 # Enable the website
+echo Enabling the site in apache
 sudo a2ensite ${app_name}.app.com.conf
 sudo service apache2 reload
 
 # Create an entry on /etc/hosts
-echo Create an entry on /etc/hosts pointing to 127.0.0.1 with ${app_name}.app
-
+echo Create an entry on /etc/hosts pointing ${app_name}.app to 127.0.0.1
+echo -e "\n127.0.0.1\t${app_name}.app"
